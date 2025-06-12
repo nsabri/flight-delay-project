@@ -76,6 +76,18 @@ def add_dayparts(df):
     print("Added 'dayparts' column based on 'STD' hour.")   
     return df
 
+def add_hour_bucket(df):
+    """
+    Adds a new column 'hour_bucket' to the DataFrame.
+    Each hour of the day (0 to 23) is labeled as 'h00', 'h01', ..., 'h23'
+    based on the hour extracted from the 'STD' datetime column.
+  
+    """
+    
+    # Extract hour and format as 'h00' to 'h23'
+    df['hour_bucket'] = df['STD'].dt.hour.apply(lambda x: f'h{x:02}')
+    return df
+
 def clean_data(df: pd.DataFrame): # One function to clean the DataFrame
     """
     Cleans the DataFrame by applying all preprocessing steps:
@@ -92,7 +104,8 @@ def clean_data(df: pd.DataFrame): # One function to clean the DataFrame
     df = add_flight_duration(df)
     df = add_month(df)
     df = add_dayparts(df)
-    columns_to_drop = ['ID', 'DATOP', 'FLTID', 'AC'] 
+    df = add_hour_bucket(df)
+    columns_to_drop = ['ID', 'DATOP', 'FLTID', 'AC', 'STA', 'STD', 'STATUS'] 
     df = df.drop(columns=columns_to_drop)
     print("Dropped unnecessary columns:", columns_to_drop)
     print("Data cleaning completed.")
