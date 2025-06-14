@@ -88,6 +88,17 @@ def add_hour_bucket(df):
     df['hour_bucket'] = df['STD'].dt.hour.apply(lambda x: f'h{x:02}')
     return df
 
+def add_expected_delay(df):
+    def hour_to_x(hour_str):
+        hour = int(hour_str[1:])  # 'h03' -> 3
+        return hour - 3 if hour >= 3 else hour + 21
+
+    df = df.copy() 
+    df['x'] = df['hour_bucket'].apply(hour_to_x)
+    df['expected_delay'] = 2.9 * df['x'] + 26
+    df.drop(columns=['x'], inplace=True)
+    return df
+
 def clean_data(df: pd.DataFrame): # One function to clean the DataFrame
     """
     Cleans the DataFrame by applying all preprocessing steps:
@@ -97,6 +108,8 @@ def clean_data(df: pd.DataFrame): # One function to clean the DataFrame
     4. Adds 'flight_duration' column.
     5. Adds 'month' column.
     6. Adds 'dayparts' column.
+    7. Add hour bucket column.
+    8. Adds 'expected_delay' column. (Baseline model)
     """
     df = add_ac_type(df)
     df = filter_flight_status(df)
@@ -105,6 +118,7 @@ def clean_data(df: pd.DataFrame): # One function to clean the DataFrame
     df = add_month(df)
     df = add_dayparts(df)
     df = add_hour_bucket(df)
+    df = add_expected_delay(df)
     columns_to_drop = ['ID', 'DATOP', 'FLTID', 'AC', 'STA', 'STD', 'STATUS'] 
     df = df.drop(columns=columns_to_drop)
     print("Dropped unnecessary columns:", columns_to_drop)
